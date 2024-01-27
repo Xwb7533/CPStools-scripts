@@ -187,7 +187,7 @@ if __name__ == "__main__":
             sys.exit()
         for file_ in os.listdir(args.input_dir):
             file_path = os.path.join(args.input_dir, file_)
-            if file_path.endswith('gb') or args.gb_file.endswith('gbk'):
+            if file_path.endswith('gb') or file_path.endswith('gbk'):
                 file_name, file_extension = os.path.splitext(os.path.basename(file_path))
                 if args.mode == 'fasta':
                     save_file = os.path.join(abs_output_dir, file_name + '.fasta')
