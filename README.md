@@ -20,7 +20,7 @@ gbcheck.py accepts two parameters:
 
 The parameter of -i/--test_file is required, and -r/--ref_file is optional.
 
-If only -i/--TEST_FILE, the gbcheck.py will check the annotation of the input file. The script will check the gene nam in each gene, CDS, tRNA and rRNA. For CDS, tRNA and rRNA, it will also check the 'product' label. 
+If only -i/--TEST_FILE, the gbcheck.py will check the annotation of the input file. The script will check the gene name in each gene, CDS, tRNA and rRNA. For CDS, tRNA and rRNA, it will also check the 'product' label. 
 
 For CDS, the codon amino acids will be check, if start codon, stop codon and internal codon was wrong, it will print out the location of CDS.
 
@@ -46,17 +46,21 @@ it will compare gene counts and difference in two GenBank files.
 
 ## 2 Sequence adjustment function
 
-There are three scripts in this function:
+There are two scripts in this function:
 
 ​	IR.py : identify the four regions in chloroplast genome sequences.
 
-​	LSC_adj.py : adjust the sequence start with the first bp in LSC region.
+​	seq_adj.py: this script has three modes, LSC, SSC, and RP
 
-​	SSC_adj.py : adjust the direction of SSC region.
+​		LSC: adjust the sequence start with the first bp in LSC region.
+
+​		SSC: adjust the direction of SSC region.
+
+​		RP: adjust the sequence to the reversed complement.
 
 ### Parameters
 
-	#### IR.py
+#### IR.py
 
 IR.py accepts one parameter:
 
@@ -64,9 +68,11 @@ IR.py accepts one parameter:
 
 The parameter of -i/--input_file is required. The input_file can be Fasta or Genbank format file.
 
-#### LSC_adj.py
+#### seq_adj.py
 
-LSC_adj.py accepts three parameters, and three parameters are all required:
+This scripts should combine the results of collinearity, which can get from the tool of nucmer.
+
+seq_adj.py accepts four parameters, and all parameters are all required:
 
 ​	-i, --work_dir
 
@@ -74,23 +80,7 @@ LSC_adj.py accepts three parameters, and three parameters are all required:
 
 ​	-f, --info_file
 
-The parameter of -i/--work_dir is the directory of  sequences, which need to adjust to the first bp in LSC region.
-
-The parameter of -o/--save_dir is the directory of  sequences saved.
-
-The parameter of -f/--info_file is the results, get from IR.py and adjusted to one line for each sequences, and separate with tab.
-
-#### SSC_adj.py
-
-This scripts should combine the results of collinearity, which can get from the tool of nucmer.
-
-LSC_adj.py accepts three parameters, and three parameters are all required:
-
-​	-i, --work_dir
-
-​	-o, --save_dir
-
-​	-f, --info_text
+​	-m, --mode 
 
 The parameter of -i/--work_dir is the directory of  sequences, which need to reverse the SSC region.
 
@@ -98,7 +88,7 @@ The parameter of -o/--save_dir is the directory of  sequences saved.
 
 The parameter of -f/--info_file is the results, get from IR.py and adjusted to one line for each sequences, and separate with tab.
 
-
+The parameter of -m/--mode is the adjusted mode, and should be selected form the SSC, LSC or RP. For SSC, it will adjust the direction of SSC forward, LSC to adjust the sequence start to first bp in LSC region, and RP to reverse complement the sequence and adjust to the first bp in LSC region.
 
 ### Usage
 
@@ -110,39 +100,23 @@ python IR.py -i input_file
 
 The input_file can be Genbank of Fasta format file. it will find the four regions in the chloroplast sequences, which the IR region should surpass 1,000 bp.
 
-#### LSC_adj.py
+#### seq_adj.py
 
 ```
-python LSC_adj.py -i work_dir -o save_dir -f info.txt 
+python LSC_adj.py -i work_dir -o save_dir -f info.txt -m mode
 ```
 
-The adjusted sequences will be save into save_dir.  -i must be directory
-
-#### SSC_adj.py
-
-```
-python SSC_adj.py -i work_dir -o save_dir -f info.txt 
-```
-
-The SSC reversed sequences will be save into save_dir.  -i must be directory
+The adjusted sequences will be save into save_dir.  -i must be directory -m must be LSC, SSC or RP.
 
 
 
 ## 3 Pi analysis function
 
-There are six scripts in this function:
+There are two scripts in this function:
 
-​	Pi_1.py : Extract intergenic sequences (IGS) from Genbank files
+​	Pi_1.py : Extract common intergenic and gene sequences from Genbank files.
 
-​	Pi_2.py : Obtain common sequences from the extracted IGS sequences
-
-​	Pi_3.py : Calculate Pi values.
-
-​	Pi_4.py: Sorted common intergenic spaces results as cp genome order.
-
-​	Pi_5.py: Extract common gene sequences from Genbank files
-
-​	Pi_6.py: Sorted common gene as cp genome order.
+​	Pi_3.py : Calculate Pi values and sort as cp genome order.
 
 ### Parameters
 
@@ -156,61 +130,13 @@ Note : the Genbank files should checked by gbcheck.py
 
 #### Pi_2.py
 
-Pi_2.py accepts one parameter:
+Pi_2.py accepts three parameter:
 
-​	-i,--ref_fasta: The input ref fasta file is put in the all fasta directory which generated from 06_Pi_1.py
+-i,--input: Input the directory path of the multi-alignment sequences
 
-Note : Please select one file as ref fasta from the sequences generated from 06_Pi_1.py
+-r, --reference Input the file path of 'cp_sort_IGS.txt', which can generated from Pi_1.py.
 
-#### Pi_3.py
-
-before run Pi_3.py:
-
-Please run the command:
-
-```shell
-cd unalign_common_IGS
-mkdir align_IGS
-for i in ./*.fasta; do mafft --auto  $i > ./align_IGS/$i ;done
-```
-
-The step above was to do the multiple sequence alignment. 
-
-Pi_3.py accepts one parameter:
-
-​	-i,--input_dir: The Aligned fasta format work directory. 'align_IGS'
-
-#### Pi_4.py
-
-Pi_4.py accepts two parameters:
-
-​	-i, input: Input the file path of 'Pi_results.txt', generated by 06_Pi_3.py
-
-​	-r, --reference: Input the file path of 'cp_sort_IGS.txt', generated by 06_Pi_3.py
-
-#### Pi_5.py
-
-Pi_5.py accepts one parameter:
-
-​	-i,--input_file:  All the Genbank files was set at a directory, and choose one file as input_file
-
-Then run the following command to make multi-alignment.
-
-```shell
-cd common_gene/
-mkdir align_gene
-for i in ./*.fasta; do mafft --auto  $i > ./align_gene/$i ;done'
-```
-
-#### Pi_6.py
-
-Pi_6.py accepts two parameters:
-
-​	-i, input: Input the file path of 'Pi_results.txt', generated by 06_Pi_3.py
-
-​	-r, --reference: Input the file path of 'cp_sort_IGS.txt', generated by 06_Pi_5.py
-
-
+-m, --mode  it has two modes, gene and IGS. IGS for sorting intergenic spaces sequences into cp order; gene for sorting gene sequences into cp order;
 
 ### Usage
 
@@ -229,71 +155,31 @@ mkdir fasta
 mv *IGS.fasta ./fasta
 ```
 
-#### Pi_2.py
+before run Pi_2.py:
 
-From fasta directory, select one sequence as input file for Pi_2.py
-
-```python
-python Pi_2.py -i ref.fasta
-```
-
-Then, to do the multi-alignment
+Please run the command to do the multiple sequence alignment:
 
 ```shell
-cd unalign_common_IGS/
+# IGS multi-alignment
+cd unalign_common_IGS
 mkdir align_IGS
 for i in ./*.fasta; do mafft --auto  $i > ./align_IGS/$i ;done
-```
 
-#### Pi_3.py
-
-```shell
-python Pi_3.py -i align_IGS
-```
-
-The calculate result will save into the align_IGS/Pi_results.txt
-
-#### Pi_4.py
-
-Then, to sort  intergenic spaces results as cp genome order.
-
-```
-python Pi_4.py -i align_IGS/Pi_results.txt -r ../cp_sort_IGS.txt
-```
-
-The cp_sort_IGS.txt is generated from Pi_3.py and saved in the unalign_common_IGS directory.
-
-The sorted results is saved in the 'align_IGS/IGS_sort_as_cp_order.txt'
-
-#### Pi_5.py
-
-Put the all Genbank files into one directory and select one file as reference, then run the Pi_5.py
-
-```
-python Pi_5.py -i genbank_directory/ref_genbank_file
-```
-
-The extracted common gene was save in the common_gene directory, and the script also give the following command:
-
-```shell
+# gene multi-alignment
 cd common_gene/
 mkdir align_gene
-for i in ./*.fasta; do mafft --auto  $i > ./align_gene/$i ;done
-# Then run the Pi_3.py to calculate the pi values.
-python Pi_3.py -i align_gene
+for i in ./*.fasta; do mafft --auto  $i > ./align_gene/$i ;done'
 ```
 
-#### Pi_6.py
+#### Pi_2.py
 
-```
-python Pi_6.py -i align_gene/Pi_results.txt -r ../gene_cp_sort.txt
-```
+To calculate the Pi values and sort into the order as cp genome.
 
-The final result is save into 'align_gene/gene_sort_as_cp_order.txt'.
+```shell
+python Pi_2.py -i align_IGS -r cp_sort_IGS.txt -m gene/IGS
+```
 
 Note: if the 'rps12' was in the first line, you can move it into the correct location.
-
-
 
 ## 4 RSCU function
 
@@ -373,13 +259,10 @@ python SSR_analysis.py -i input_file -k 11,6,5,4,4,3
 
 ## 6 Phylogenetic analysis function
 
-There are two scripts in this function:
+There are two mode in this function:
 
-​	common_cds.py: To obtain commom CDS nucleotide sequences from Genbank files
-
-​	common_pro.py: To obtain commom CDS protein sequences from Genbank files
-
-Note: to ensure the accuracy of the results, the Genbank files should checked by gbcheck.py
+-m/--mode cds/pro cds for common cds sequences; pro for common
+                    protein sequences
 
 ### Parameters
 
@@ -389,67 +272,62 @@ common_cds.py and common_pro.py both accept two parameters:
 
 ​	-o/--output_dir: output directory of fasta files
 
+​	-m/--mode cds/pro  cds for common cds sequences; pro for common
+​                protein sequences
+
 ### Usage
 
 ```shell
 # The merged cds file is saved in results/merge_cds.fasta
-Python common_cds.py -i ref_file.gb -o results
+Python phy_built.py -i ref_file.gb -o results -m cds
 # The merged protein file is saved in results2/merge_pro.fasta
-Python common_cds.py -i ref_file.gb -o results2
+Python phy_built.py -i ref_file.gb -o results2 -m pro
 ```
 
 
 
 ## 7 Format conversion function
 
-There are three scripts in this function:
+There are three modes in this function:
 
-​	gb2fa.py: To convert Genbank format file into Fasta format.
+​	gb2fa: To convert Genbank format file into Fasta format.
 
-​	gb2mVISTA.py: To prepare annotation file for mVISTA software.
+​	gb2mVISTA: To prepare annotation file for mVISTA software.
 
-​	gb2tbl.py: To convert Genbank format file into tabular format.
+​	gb2tbl: To convert Genbank format file into tabular format.
 
 Note: to ensure the accuracy of the results, the Genbank files should checked by gbcheck.py
 
 ### Parameters
 
-#### gb2fa.py 
-
-accepts two parameters:
+accepts three parameters:
 
 ​	-i/--gb_file:  Input path of genbank file
 
 ​	-o/--fa_file: output path of fasta file
 
-#### gb2mVISTA.py and gb2tbl.py 
-
-both accept one parameter:
-
-​	-i/--work_dir: Input directory of genbank files
+​	-m/--mode: fasta,mVISTA,tbl
 
 ### Usage
 
-#### gb2fa.py
+#### gb2fa
 
 ```shell
-python gb2fa -i input.gb -o output.fasta
+python converse.py -i input.gb -o output.fasta -m fasta
 ```
-
-
 
 #### gb2tbl.py
 
 ```shell
 # the genbank is the directory of Genbank format files
-python gb2tbl.py -i genbank
+python converse.py -i genbank -o output.fasta -m tbl
 ```
 
 #### gb2mVISTA.py
 
 ```shell
 # the genbank is the directory of Genbank format files
-python gb2mVISTA.py -i genbank
+python converse.py -i genbank -o output.fasta -m mVISTA
 ```
 
 
