@@ -208,7 +208,7 @@ def information_table(input_file, output_file):
             else:
                 gene_8.append(f"{key}({value})")
             gene_8_ = ','.join(i for i in gene_8)
-        ff.write(f'Self-replication\tProteins of large ribosomal subunit\t{gene_8_}\n')
+        ff.write(f'Self-replication\t\tProteins of large ribosomal subunit\t{gene_8_}\n')
         for key, value in Proteins_of_small_ribosomal_subunit.items():
             if value == 1:
                 gene_9.append(key)
