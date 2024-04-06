@@ -122,16 +122,17 @@ def compare_genbank_files(ref_file, test_file):
                     gene_end = int(gene_loc.end)
                     print(f"[{gene_start, gene_end}]  in test gb file has no gene name!")
 
-    print(f"Reference genbank file has {len(ref_dict)} genes!")
-    print(f"Test genbank file has {len(test_dict)} genes!")
+    print(f"{ref_file} file has {len(ref_dict)} genes!")
+    print(f"{test_file} has {len(test_dict)} genes!")
 
     # Comparative
     for gene in ref_dict.keys():
         if ref_dict[gene] != test_dict[gene]:
-            print(f"{gene} in reference file number is {ref_dict[gene]} \
-                but in test file is {test_dict[gene]}")
+            print(f"{gene} in {ref_file} number is {ref_dict[gene]} \
+                but in {test_file} is {test_dict[gene]}")
     result_dict = {key: value for key, value in test_dict.items() if key not in ref_dict}
     print(f"Un annotated Genes in reference is {result_dict}")
+
 
 
 if __name__ == '__main__':
